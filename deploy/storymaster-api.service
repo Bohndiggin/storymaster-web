@@ -1,0 +1,45 @@
+[Unit]
+Description=Storymaster API server
+Documentation=https://github.com/Bohndiggin/storymaster
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=storymaster
+Group=storymaster
+WorkingDirectory=/opt/storymaster
+
+# All runtime config flows through env. The .env file is the deploy-local
+# secret material — DB password, CORS origins, server bind addr.
+EnvironmentFile=/etc/storymaster/storymaster.env
+
+# Runs uvicorn through the project's virtualenv. The api.main entry point
+# reads STORYMASTER_HOST / STORYMASTER_PORT / STORYMASTER_RELOAD from env
+# and dispatches to the FastAPI app at storymaster.api.app:app.
+ExecStart=/opt/storymaster/.venv/bin/python -m storymaster.api.main
+
+# A single uvicorn worker is plenty for the small-team deploy; switch to
+# `--workers N` (and uvicorn-workers config) when concurrent users justify
+# it. SQLite users should never go past 1; Postgres can scale.
+Restart=on-failure
+RestartSec=2s
+
+# Tighten the sandbox. None of these are strictly required but they make
+# breakouts costlier without changing app behavior.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/storymaster /var/backups/storymaster
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

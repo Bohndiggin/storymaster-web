@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply font-sans antialiased;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-md border border-slate-800 bg-canvas-panel;
+  }
+
+  /* Litographer node shapes — clip-path so the ring follows the silhouette
+     and React Flow's hit area still matches the rendered geometry. The boxes
+     are all 144×96 (w-36 h-24); the clips below are normalized to that. */
+
+  .story-shape-rect {
+    border-radius: 8px;
+  }
+
+  .story-shape-diamond {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .story-shape-circle {
+    border-radius: 9999px;
+  }
+
+  .story-shape-hex {
+    clip-path: polygon(
+      25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%
+    );
+  }
+
+  .story-shape-triangle {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+
+  .story-shape-star {
+    clip-path: polygon(
+      50% 0%, 61% 35%, 98% 35%, 68% 57%,
+      79% 91%, 50% 70%, 21% 91%, 32% 57%,
+      2% 35%, 39% 35%
+    );
+  }
+
+  /* Storyweaver editor styling. We don't pull in @tailwindcss/typography
+     because the prose set is small and we want full control over how
+     entity highlights interact with paragraphs. */
+
+  .story-prose {
+    @apply text-slate-100;
+    line-height: 1.6;
+  }
+  .story-prose p {
+    @apply my-3;
+  }
+  .story-prose h1 {
+    @apply mb-3 mt-6 text-2xl font-bold;
+  }
+  .story-prose h2 {
+    @apply mb-2 mt-5 text-xl font-semibold;
+  }
+  .story-prose h3 {
+    @apply mb-2 mt-4 text-lg font-semibold;
+  }
+  .story-prose ul {
+    @apply my-3 list-disc pl-6;
+  }
+  .story-prose ol {
+    @apply my-3 list-decimal pl-6;
+  }
+  .story-prose blockquote {
+    @apply my-3 border-l-2 border-slate-700 pl-3 text-slate-300 italic;
+  }
+  .story-prose code {
+    @apply rounded bg-canvas-raised px-1 py-0.5 font-mono text-xs;
+  }
+  .story-prose pre {
+    @apply my-3 overflow-x-auto rounded-md bg-canvas-raised p-3;
+  }
+
+  /* Auto-tagged entity mention (ambient match). Dashed underline. */
+  .story-entity-mention {
+    border-bottom: 1px dashed theme("colors.accent.DEFAULT");
+    cursor: help;
+    transition: background-color 120ms ease;
+  }
+  .story-entity-mention:hover {
+    background-color: theme("colors.accent.DEFAULT" / 15%);
+  }
+
+  /* Explicit `[[`-trigger mention. Solid pill — visually distinct from the
+     ambient highlight so authors can tell which references are "intentional". */
+  .story-mention {
+    @apply rounded px-1 py-0.5 text-accent;
+    background-color: theme("colors.accent.DEFAULT" / 15%);
+    cursor: pointer;
+    transition: background-color 120ms ease;
+  }
+  .story-mention:hover {
+    background-color: theme("colors.accent.DEFAULT" / 30%);
+  }
+
+  /* Tiptap placeholder (from @tiptap/extension-placeholder). */
+  .story-prose p.is-editor-empty:first-child::before {
+    color: theme("colors.slate.500");
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+}

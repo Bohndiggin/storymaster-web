@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Storymaster Postgres backup
+
+[Timer]
+# 03:30 local time every day, with up to 30 minutes of jitter so multiple
+# hosts on the same network don't all hit the database at once.
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

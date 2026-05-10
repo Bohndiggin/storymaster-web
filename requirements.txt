@@ -1,0 +1,39 @@
+# Core dependencies for Storymaster
+PySide6
+SQLAlchemy==2.0.41
+intervaltree>=3.1.0  # For Storyweaver entity tracking
+
+# API server dependencies
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+qrcode[pil]>=7.0
+pillow==11.1.0
+python-multipart==0.0.20
+requests==2.32.3
+
+# Web auth + migrations
+argon2-cffi>=23.1.0
+itsdangerous>=2.2.0
+alembic>=1.13.0
+
+# Postgres driver (only loaded when STORYMASTER_DB_URL points at postgres).
+# `psycopg[binary]` ships its own libpq; saves a system dep on the deploy host.
+psycopg[binary]>=3.2.0
+
+# Spell checking support (optional - falls back to basic word list if not available)
+pyenchant==3.2.2
+
+# PDF export support for Storyweaver
+markdown>=3.4.0
+
+# Development and testing dependencies (optional)
+pytest==8.4.1
+black==25.1.0
+isort==6.0.1
+Faker==37.4.2
+
+# Distribution dependencies
+# Note: For macOS builds, use PyInstaller develop branch instead due to PyQt6 compatibility issues
+# Install with: PYINSTALLER_COMPILE_BOOTLOADER=1 pip install git+https://github.com/pyinstaller/pyinstaller.git@develop
+pyinstaller==6.11.1

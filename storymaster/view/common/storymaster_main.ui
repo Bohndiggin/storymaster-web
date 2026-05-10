@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StorymasterMainWindow</class>
+ <widget class="QMainWindow" name="StorymasterMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Storymaster</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QStackedWidget" name="pageStack">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="litographerPage">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QToolBar" name="litographerToolbar">
+          <property name="windowTitle">
+           <string>toolBar</string>
+          </property>
+          <addaction name="actionAddNode"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGraphicsView" name="nodeGraphView"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="newLorekeeperPage"/>
+      <widget class="QWidget" name="characterArcsPage">
+       <layout class="QVBoxLayout" name="characterArcsLayout">
+        <item>
+         <widget class="QWidget" name="characterArcsContainer" native="true">
+          <!-- Character arc widget will be loaded here programmatically -->
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="storyweaverPage"/>
+     </widget>
+    </item>
+    <item>
+     <!-- Context info bar showing current storyline and setting -->
+     <widget class="QWidget" name="contextInfoBar" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>24</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>24</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="contextInfoLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <spacer name="contextInfoSpacer1">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="storylineButton">
+         <property name="text">
+          <string>Storyline ▼</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="contextSeparator">
+         <property name="text">
+          <string>|</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="settingButton">
+         <property name="text">
+          <string>Setting ▼</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="contextInfoSpacer2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <!-- This is the bottom navigation bar that mimics DaVinci Resolve -->
+     <widget class="QWidget" name="bottomNavBar" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>40</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>40</height>
+       </size>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="litographerNavButton">
+         <property name="text">
+          <string>Litographer</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">navButtonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="lorekeeperNavButton">
+         <property name="text">
+          <string>Lorekeeper</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">navButtonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="characterArcsNavButton">
+         <property name="text">
+          <string>Character Arcs</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">navButtonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="storyweaverNavButton">
+         <property name="text">
+          <string>Storyweaver</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">navButtonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionImportFromJSON"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreateBackup"/>
+    <addaction name="actionDatabaseManager"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuStoryline">
+    <property name="title">
+     <string>Storyline</string>
+    </property>
+    <addaction name="actionNewStoryline"/>
+    <addaction name="actionSwitchStoryline"/>
+    <addaction name="actionEditStorylines"/>
+   </widget>
+   <widget class="QMenu" name="menuSetting">
+    <property name="title">
+     <string>Setting</string>
+    </property>
+    <addaction name="actionNewSetting"/>
+    <addaction name="actionSwitchSetting"/>
+    <addaction name="actionEditSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionManageSetting"/>
+   </widget>
+   <widget class="QMenu" name="menuUser">
+    <property name="title">
+     <string>User</string>
+    </property>
+    <addaction name="actionNewUser"/>
+    <addaction name="actionSwitchUser"/>
+    <addaction name="separator"/>
+    <addaction name="actionManageUsers"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuStoryline"/>
+   <addaction name="menuSetting"/>
+   <addaction name="menuUser"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNewStoryline">
+   <property name="text">
+    <string>New Storyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new storyline</string>
+   </property>
+  </action>
+  <action name="actionNewSetting">
+   <property name="text">
+    <string>New Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new setting</string>
+   </property>
+  </action>
+  <action name="actionSwitchStoryline">
+   <property name="text">
+    <string>Switch Storyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to a different storyline</string>
+   </property>
+  </action>
+  <action name="actionSwitchSetting">
+   <property name="text">
+    <string>Switch Setting</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to a different setting</string>
+   </property>
+  </action>
+  <action name="actionNewPlot">
+   <property name="text">
+    <string>New Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new plot in the current storyline</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open Storyline</string>
+   </property>
+   <property name="toolTip">
+    <string>Open a different storyline</string>
+   </property>
+  </action>
+  <action name="actionSwitchPlot">
+   <property name="text">
+    <string>Switch Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to a different plot in the current storyline</string>
+   </property>
+  </action>
+  <action name="actionDeletePlot">
+   <property name="text">
+    <string>Delete Plot</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete the current plot</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAddNode">
+   <property name="text">
+    <string>Add Node</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new node to the canvas</string>
+   </property>
+  </action>
+  <action name="actionNewUser">
+   <property name="text">
+    <string>New User</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new user</string>
+   </property>
+  </action>
+  <action name="actionSwitchUser">
+   <property name="text">
+    <string>Switch User</string>
+   </property>
+   <property name="toolTip">
+    <string>Switch to a different user</string>
+   </property>
+  </action>
+  <action name="actionManageUsers">
+   <property name="text">
+    <string>Manage Users</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage users (add, switch, delete)</string>
+   </property>
+  </action>
+  <action name="actionCreateBackup">
+   <property name="text">
+    <string>Create Backup</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a manual backup of the database</string>
+   </property>
+  </action>
+  <action name="actionDatabaseManager">
+   <property name="text">
+    <string>Database Manager</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage databases and backups</string>
+   </property>
+  </action>
+  <action name="actionManageSetting">
+   <property name="text">
+    <string>Import Lore Packages</string>
+   </property>
+   <property name="toolTip">
+    <string>Import world building packages into current setting</string>
+   </property>
+  </action>
+  <action name="actionImportFromJSON">
+   <property name="text">
+    <string>Import from JSON</string>
+   </property>
+   <property name="toolTip">
+    <string>Import storyline data from JSON file</string>
+   </property>
+  </action>
+  <action name="actionEditSettings">
+   <property name="text">
+    <string>Edit Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Create, edit, switch, or delete settings</string>
+   </property>
+  </action>
+  <action name="actionEditStorylines">
+   <property name="text">
+    <string>Edit Storylines</string>
+   </property>
+   <property name="toolTip">
+    <string>Create, edit, switch, or delete storylines</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="navButtonGroup"/>
+ </buttongroups>
+</ui>
