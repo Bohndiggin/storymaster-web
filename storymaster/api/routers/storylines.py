@@ -9,7 +9,7 @@ for other users' data.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from storymaster.api.authz import require_setting, require_storyline
@@ -87,6 +87,14 @@ def delete_storyline(
     storyline: schema.Storyline = Depends(require_storyline),
     db: Session = Depends(get_db),
 ):
+    # `document.storyline_id` is an optional inbox tag, not an owning FK — the
+    # doc is user-owned and survives. Detach it before deleting the storyline
+    # so Postgres' FK constraint doesn't block the delete.
+    db.execute(
+        update(schema.Document)
+        .where(schema.Document.storyline_id == storyline.id)
+        .values(storyline_id=None)
+    )
     db.delete(storyline)
     db.commit()
 
@@ -147,6 +155,15 @@ def delete_setting(
     setting: schema.Setting = Depends(require_setting),
     db: Session = Depends(get_db),
 ):
+    # `document.setting_id` is an optional inbox tag — detach docs from the
+    # setting rather than deleting them, and so the Postgres FK doesn't block
+    # the delete. (Lorekeeper entities under the setting cascade away via the
+    # ORM relationships on Setting.)
+    db.execute(
+        update(schema.Document)
+        .where(schema.Document.setting_id == setting.id)
+        .values(setting_id=None)
+    )
     db.delete(setting)
     db.commit()
 

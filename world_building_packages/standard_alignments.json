@@ -1,0 +1,56 @@
+{
+  "_package_info": {
+    "display_name": "Standard Alignments",
+    "description": "The classic nine-axis alignment grid (Lawful/Neutral/Chaotic × Good/Neutral/Evil)",
+    "category": "General",
+    "version": "1.0",
+    "author": "Storymaster"
+  },
+  "alignment": [
+    {
+      "name": "Lawful Good",
+      "description": "Acts with honor and compassion. Follows codes, respects authority, and protects the innocent.",
+      "setting_id": 1
+    },
+    {
+      "name": "Neutral Good",
+      "description": "Does what is good without bias for or against order. Helps others as conscience directs.",
+      "setting_id": 1
+    },
+    {
+      "name": "Chaotic Good",
+      "description": "Follows their own conscience. Values freedom and kindness over law and tradition.",
+      "setting_id": 1
+    },
+    {
+      "name": "Lawful Neutral",
+      "description": "Acts in accordance with law, tradition, or a personal code. Order over good or evil.",
+      "setting_id": 1
+    },
+    {
+      "name": "True Neutral",
+      "description": "Does what seems like a good idea. Avoids strong attachments to ideology or alignment.",
+      "setting_id": 1
+    },
+    {
+      "name": "Chaotic Neutral",
+      "description": "Follows whims, prizing personal freedom above all. Unpredictable but not malicious.",
+      "setting_id": 1
+    },
+    {
+      "name": "Lawful Evil",
+      "description": "Takes what they want within the limits of a code or hierarchy. Methodical and ruthless.",
+      "setting_id": 1
+    },
+    {
+      "name": "Neutral Evil",
+      "description": "Does whatever they can get away with. Loyalty only to self; ruthless self-interest.",
+      "setting_id": 1
+    },
+    {
+      "name": "Chaotic Evil",
+      "description": "Acts on greed, hatred, and lust for destruction. Hot-tempered, violent, unpredictable.",
+      "setting_id": 1
+    }
+  ]
+}

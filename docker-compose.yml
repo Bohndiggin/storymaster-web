@@ -1,0 +1,66 @@
+# Storymaster — single-host docker-compose deploy.
+#
+# Default shape: one `app` container running the FastAPI server and serving
+# the SPA bundle. Postgres is assumed to be external (the host runs it, or
+# it's on a different machine). Uncomment the `postgres` service block if
+# you want a fully self-contained stack.
+
+services:
+  app:
+    build:
+      context: .
+      # Pin the API + web build into one image. The runtime layer is
+      # python:3.11-slim; the SPA is built via a node:20 stage.
+    image: storymaster-web:latest
+    restart: unless-stopped
+    # Read DB URL, secret keys, etc. from a sibling .env file.
+    env_file:
+      - .env
+    environment:
+      # Inside the container, bind to 0.0.0.0 so the published port works.
+      STORYMASTER_HOST: 0.0.0.0
+      STORYMASTER_PORT: "8765"
+    ports:
+      # Bind to localhost so a host-level reverse proxy (nginx, Caddy)
+      # owns TLS. To expose directly, change to "8765:8765".
+      - "127.0.0.1:8765:8765"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8765/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    # Optional: a writable volume for backup output if you run pg_dump
+    # from inside the container (otherwise host-side cron is fine too).
+    volumes:
+      - ./backups:/var/backups/storymaster
+    # The depends_on block below activates if you uncomment the postgres
+    # service. Otherwise the app reaches an external Postgres via DB_URL.
+    # depends_on:
+    #   postgres:
+    #     condition: service_healthy
+
+  # ---------------------------------------------------------------------
+  # Optional: Postgres sidecar for a self-contained stack.
+  #
+  # Uncomment this block and set STORYMASTER_DB_URL in .env to:
+  #     postgresql+psycopg://storymaster:<pw>@postgres:5432/storymaster
+  # to point the app at this service instead of an external DB.
+  # ---------------------------------------------------------------------
+  # postgres:
+  #   image: postgres:18-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: storymaster
+  #     POSTGRES_DB: storymaster
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U storymaster"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   postgres-data:

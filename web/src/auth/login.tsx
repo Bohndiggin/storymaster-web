@@ -43,9 +43,15 @@ export function LoginPage() {
         : null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas">
-      <Card className="w-[360px]">
-        <CardHeader>
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="flex-col items-center gap-2 text-center">
+          <img
+            src="/storymaster_icon_256.png"
+            alt=""
+            aria-hidden
+            className="h-16 w-16 rounded-md"
+          />
           <CardTitle>Sign in to Storymaster</CardTitle>
         </CardHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">

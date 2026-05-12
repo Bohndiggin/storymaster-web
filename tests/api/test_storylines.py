@@ -116,3 +116,50 @@ def test_link_rejects_other_users_setting(login_as):
         json={"setting_id": alice_setting_id},
     )
     assert r.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Deleting a storyline / setting that has documents tagged to it
+# ---------------------------------------------------------------------------
+
+
+def test_delete_setting_detaches_documents(login_as):
+    """A document tagged to a setting survives the setting's deletion.
+
+    `document.setting_id` is an optional inbox tag, not an owning FK — Postgres
+    enforces it, so the delete must NULL it out first. (SQLite doesn't enforce
+    the constraint, but this still exercises the detach path.)
+    """
+    client, _ = login_as("alice")
+    sid = client.post("/api/v1/settings", json={"name": "Old world"}).json()["id"]
+    doc = client.post(
+        "/api/v1/documents",
+        json={"title": "Lore notes", "setting_id": sid},
+    )
+    assert doc.status_code == 201, doc.text
+    doc_id = doc.json()["id"]
+
+    rm = client.delete(f"/api/v1/settings/{sid}")
+    assert rm.status_code == 204, rm.text
+
+    after = client.get(f"/api/v1/documents/{doc_id}")
+    assert after.status_code == 200, after.text
+    assert after.json()["setting_id"] is None
+
+
+def test_delete_storyline_detaches_documents(login_as):
+    client, _ = login_as("alice")
+    sid = client.post("/api/v1/storylines", json={"name": "Old arc"}).json()["id"]
+    doc = client.post(
+        "/api/v1/documents",
+        json={"title": "Draft", "storyline_id": sid},
+    )
+    assert doc.status_code == 201, doc.text
+    doc_id = doc.json()["id"]
+
+    rm = client.delete(f"/api/v1/storylines/{sid}")
+    assert rm.status_code == 204, rm.text
+
+    after = client.get(f"/api/v1/documents/{doc_id}")
+    assert after.status_code == 200, after.text
+    assert after.json()["storyline_id"] is None

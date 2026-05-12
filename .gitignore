@@ -8,7 +8,6 @@ test.py
 .pytest_cache
 .coverage
 .venv
-CLAUDE.md
 *.appimage
 *.AppImage
 *APPIMAGE_USAGE.md
@@ -22,6 +21,7 @@ clockwork_gods_relationships_seed.py
 clockwork_gods_seed.py
 seed_shadow_necromancer.py
 storymaster-standalone-linux-x86_64.tar.gz
+storymaster-web.tar.gz
 duelist_data_importer.py
 *.dmg
 Storymaster.app/

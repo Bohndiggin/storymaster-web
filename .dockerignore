@@ -1,0 +1,53 @@
+# Keep the build context lean. Anything copied into a stage but never used
+# still costs network and disk on every build, so we exclude liberally.
+
+# VCS + editor cruft
+.git
+.gitignore
+.github
+.vscode
+.idea
+*.swp
+*.swo
+
+# Python local artifacts
+__pycache__/
+*.py[cod]
+*.egg-info
+*.egg
+.pytest_cache
+.mypy_cache
+.coverage
+.tox
+build/
+dist/
+*.db
+*.sqlite
+*.sqlite3
+.venv
+venv/
+env/
+.python-version
+
+# Web local artifacts (we rebuild the SPA inside the build stage)
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Tests are run pre-build, not inside the image
+tests/
+
+# Existing desktop deploy artifacts that aren't relevant in-container
+deploy/
+PHASE3_TODO.md
+PHASE6_TODO.md
+PLAN.md
+DOCKER.md
+
+# Demo / scratch state
+.local-demo.db
+*.log
+
+# Mac/Linux junk
+.DS_Store
+Thumbs.db

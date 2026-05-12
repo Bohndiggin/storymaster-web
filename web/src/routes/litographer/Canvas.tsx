@@ -17,12 +17,14 @@ import {
 import "@xyflow/react/dist/style.css";
 
 import {
+  useAddNodeToSection,
   useConnections,
   useCreateConnection,
   useCreateNode,
   useDeleteConnection,
   useDeleteNode,
   useNodes,
+  useNodesInSection,
 } from "@/api/litographer";
 import type { LitographyNode, NodeType } from "@/api/types";
 import { Button } from "@/components/Button";
@@ -60,14 +62,25 @@ function Inner({ storylineId }: { storylineId: number }) {
   const nodesQ = useNodes(storylineId);
   const connectionsQ = useConnections(storylineId);
 
+  const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
+  const sectionNodesQ = useNodesInSection(activeSectionId);
+
   const createNode = useCreateNode(storylineId);
   const deleteNode = useDeleteNode(storylineId);
   const createConnection = useCreateConnection(storylineId);
   const deleteConnection = useDeleteConnection(storylineId);
+  const addNodeToSection = useAddNodeToSection(storylineId);
   const positionFlush = usePositionFlush(storylineId);
 
-  const [activeSectionId, setActiveSectionId] = useState<number | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
+
+  // Visible-node set: when a section is selected, show only nodes in that
+  // section. Falling back to all-storyline nodes happens during the brief
+  // window before the default section auto-creates on first load.
+  const visibleNodes = useMemo(() => {
+    if (activeSectionId != null && sectionNodesQ.data) return sectionNodesQ.data;
+    return nodesQ.data ?? [];
+  }, [activeSectionId, sectionNodesQ.data, nodesQ.data]);
 
   // React Flow holds its own copy of nodes/edges so it can drag without
   // round-tripping the server on every frame. We rebuild that local copy
@@ -77,14 +90,24 @@ function Inner({ storylineId }: { storylineId: number }) {
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
 
   useEffect(() => {
-    if (!nodesQ.data) return;
-    setRfNodes(nodesQ.data.map(toReactFlowNode));
-  }, [nodesQ.data]);
+    setRfNodes(visibleNodes.map(toReactFlowNode));
+  }, [visibleNodes]);
 
+  // Filter edges to only those whose endpoints are both in the visible set.
+  // Otherwise dragging a connection between sections would render dangling
+  // edges anchored to nothing.
   useEffect(() => {
     if (!connectionsQ.data) return;
-    setRfEdges(connectionsQ.data.map(toReactFlowEdge));
-  }, [connectionsQ.data]);
+    const visibleIds = new Set(visibleNodes.map((n) => n.id));
+    setRfEdges(
+      connectionsQ.data
+        .filter(
+          (c) =>
+            visibleIds.has(c.output_node_id) && visibleIds.has(c.input_node_id),
+        )
+        .map(toReactFlowEdge),
+    );
+  }, [connectionsQ.data, visibleNodes]);
 
   // Keep the selected-node ring in sync with selection state so React Flow
   // re-renders the node component with the right `selected` flag.
@@ -142,28 +165,56 @@ function Inner({ storylineId }: { storylineId: number }) {
   );
 
   const onAddNode = useCallback(
-    (nodeType: NodeType) => {
+    async (nodeType: NodeType) => {
       // Drop the new node near the visible center. With pan/zoom this
       // approximation is fine for the "+" button affordance; right-click in
       // the canvas would let us use the click position, deferred to a later
       // pass.
-      createNode.mutate({
+      const created = await createNode.mutateAsync({
         node_type: nodeType,
         name: titleFor(nodeType),
         x_position: 100 + Math.random() * 200,
         y_position: 100 + Math.random() * 200,
       });
+      // If a section is active, link the new node into it so the section
+      // tabs actually filter what you just added. Without this, new nodes
+      // would land in "all" but never show up under any section tab.
+      if (activeSectionId != null) {
+        try {
+          await addNodeToSection.mutateAsync({
+            sectionId: activeSectionId,
+            nodeId: created.id,
+          });
+        } catch {
+          // Server already returns 201 if the link existed; we treat any
+          // failure as benign and let the next refresh sort it out.
+        }
+      }
     },
-    [createNode],
+    [createNode, addNodeToSection, activeSectionId],
   );
 
   const selectedNode = useMemo(() => {
-    if (selectedNodeId == null || !nodesQ.data) return null;
-    return nodesQ.data.find((n) => n.id === selectedNodeId) ?? null;
-  }, [selectedNodeId, nodesQ.data]);
+    if (selectedNodeId == null) return null;
+    // Look in the visible set first so the side panel only opens for nodes
+    // that the user can actually see. Switching sections clears stale
+    // selections without an explicit reset.
+    return visibleNodes.find((n) => n.id === selectedNodeId) ?? null;
+  }, [selectedNodeId, visibleNodes]);
+
+  // If the user switches sections, drop a selection that's no longer visible.
+  useEffect(() => {
+    if (selectedNodeId == null) return;
+    const stillVisible = visibleNodes.some((n) => n.id === selectedNodeId);
+    if (!stillVisible) setSelectedNodeId(null);
+  }, [visibleNodes, selectedNodeId]);
 
   return (
     <div className="flex h-[calc(100vh-7rem)] flex-col">
+      <div className="mb-2 rounded-md border border-amber-700/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-200 md:hidden">
+        Litographer is designed for a mouse and a larger screen. Open this view
+        on a desktop for the best experience.
+      </div>
       <PlotSectionTabs
         storylineId={storylineId}
         selectedSectionId={activeSectionId}

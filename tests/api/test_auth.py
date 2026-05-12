@@ -123,3 +123,89 @@ def test_bearer_token_for_unowned_device_is_rejected(client, make_user, db_sessi
 def test_bearer_token_unknown_returns_401(client):
     r = client.get("/api/auth/me", headers={"Authorization": "Bearer wat"})
     assert r.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Change-password flow
+# ---------------------------------------------------------------------------
+
+
+def test_change_password_requires_auth(client):
+    r = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "x", "new_password": "yyyyyyyy"},
+    )
+    assert r.status_code == 401
+
+
+def test_change_password_happy_path(login_as):
+    client, _ = login_as("alice", password="hunter2!")
+    r = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "hunter2!", "new_password": "newpassword1"},
+    )
+    assert r.status_code == 204, r.text
+
+    # Old password no longer works; new one does.
+    fresh = client.post(
+        "/api/auth/login", json={"username": "alice", "password": "hunter2!"}
+    )
+    assert fresh.status_code == 401
+    fresh = client.post(
+        "/api/auth/login", json={"username": "alice", "password": "newpassword1"}
+    )
+    assert fresh.status_code == 200
+
+
+def test_change_password_wrong_current(login_as):
+    client, _ = login_as("alice", password="hunter2!")
+    r = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "wrongguess", "new_password": "newpassword1"},
+    )
+    assert r.status_code == 400
+    assert "current" in r.json()["detail"].lower()
+
+
+def test_change_password_too_short(login_as):
+    client, _ = login_as("alice", password="hunter2!")
+    r = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "hunter2!", "new_password": "short"},
+    )
+    assert r.status_code == 400
+
+
+def test_change_password_must_differ(login_as):
+    client, _ = login_as("alice", password="hunter2!")
+    r = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "hunter2!", "new_password": "hunter2!"},
+    )
+    assert r.status_code == 400
+
+
+def test_change_password_revokes_other_sessions(login_as):
+    """The caller's session keeps working; sessions held elsewhere die."""
+    from fastapi.testclient import TestClient
+
+    keeper, _ = login_as("alice", password="hunter2!")
+    # Simulate a second browser by logging the same user in on a fresh client.
+    other = TestClient(keeper.app)
+    r = other.post(
+        "/api/auth/login", json={"username": "alice", "password": "hunter2!"}
+    )
+    assert r.status_code == 200
+
+    assert keeper.get("/api/auth/me").status_code == 200
+    assert other.get("/api/auth/me").status_code == 200
+
+    r = keeper.post(
+        "/api/auth/change-password",
+        json={"current_password": "hunter2!", "new_password": "newpassword1"},
+    )
+    assert r.status_code == 204
+
+    # Keeper still authenticated; the other client's session was deleted.
+    assert keeper.get("/api/auth/me").status_code == 200
+    assert other.get("/api/auth/me").status_code == 401

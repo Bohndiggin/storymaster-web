@@ -64,8 +64,31 @@ export function entityLabel(table: string, row: Record<string, unknown>): string
 /**
  * Friendly name for a table key. The `_` suffix on `location_` / `object_` /
  * `class` is a SQLite reserved-word workaround we don't want users to see.
+ *
+ * Top-level lorekeeper categories override this with their plural label
+ * ("Characters" instead of "Actor"); see {@link findCategoryForTable}.
  */
 export function tableLabel(table: string): string {
+  // Avoid a circular import by inlining the resolution: only top-level
+  // category tables get the override; everything else falls back to the
+  // generic prettifier below.
+  const override = TOP_LEVEL_CATEGORY_LABELS.get(table);
+  if (override) return override;
   const stripped = table.replace(/_$/, "");
   return stripped.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
+
+// Kept inline (not imported from `./categories`) to avoid a cycle: this module
+// is also imported by tests that don't want the route file's dependency tree.
+const TOP_LEVEL_CATEGORY_LABELS = new Map<string, string>([
+  ["actor", "Characters"],
+  ["faction", "Organizations"],
+  ["location_", "Places"],
+  ["object_", "Items"],
+  ["history", "Events"],
+  ["world_data", "Lore"],
+  ["background", "Backgrounds"],
+  ["race", "Heritage Types"],
+  ["class", "Professions"],
+  ["skills", "Skills"],
+]);

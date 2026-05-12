@@ -49,3 +49,10 @@ export function useLogout() {
     },
   });
 }
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (payload: { current_password: string; new_password: string }) =>
+      api.post<void>("/api/auth/change-password", payload),
+  });
+}

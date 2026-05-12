@@ -1,0 +1,28 @@
+# Cloudflare Tunnel ingress snippet for Storymaster.
+#
+# Add this hostname to the existing tunnel's config (typically
+# ~/.cloudflared/config.yml on the TrueNAS host, or wherever your
+# tunnel runs). The tunnel itself stays — this is just one more
+# ingress rule.
+#
+# After editing, restart the cloudflared service:
+#     sudo systemctl restart cloudflared
+#
+# (Or `cloudflared tunnel run` if you launch it manually.)
+
+tunnel: <your-existing-tunnel-id-or-name>
+
+ingress:
+  # ↓ Add this rule. Order matters — put it before the catch-all.
+  - hostname: storymaster.example.com
+    service: http://localhost:80
+    originRequest:
+      # Trust the local nginx; no need to verify a self-signed cert here
+      # since the link is loopback plaintext.
+      noTLSVerify: true
+
+  # Existing rules continue here…
+
+  # The catch-all must stay last. Without it cloudflared rejects unmatched
+  # hostnames with a 530.
+  - service: http_status:404

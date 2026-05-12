@@ -16,6 +16,7 @@ from storymaster.api.auth import router as auth_router
 from storymaster.api.routers.arcs import router as arcs_router
 from storymaster.api.routers.documents import router as documents_router
 from storymaster.api.routers.litography import router as litography_router
+from storymaster.api.routers.lore_packages import router as lore_packages_router
 from storymaster.api.routers.lorekeeper import router as lorekeeper_router
 from storymaster.api.routers.notes import router as notes_router
 from storymaster.api.routers.storylines import router as storylines_router
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(storylines_router)
     app.include_router(litography_router)
     app.include_router(lorekeeper_router)
+    app.include_router(lore_packages_router)
     app.include_router(arcs_router)
     app.include_router(notes_router)
     app.include_router(storyweaver_router)

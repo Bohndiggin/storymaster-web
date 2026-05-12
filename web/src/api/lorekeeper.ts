@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import type { EntityRow, LorekeeperSchema } from "@/api/types";
 
@@ -24,6 +29,23 @@ export function useEntityList(settingId: number | null, table: string | null) {
     queryFn: () =>
       api.get<EntityRow[]>(`/api/v1/settings/${settingId}/entities/${table}`),
     enabled: settingId != null && !!table,
+  });
+}
+
+/**
+ * Fetch several entity lists at once (e.g. the tables a junction's FK columns
+ * point at, so the list view can show real names instead of raw ids). Query
+ * keys match {@link useEntityList} so the cache is shared.
+ */
+export function useEntityLists(settingId: number | null, tables: string[]) {
+  return useQueries({
+    queries: tables.map((table) => ({
+      queryKey:
+        settingId != null ? entityListKey(settingId, table) : (["entities", "idle"] as const),
+      queryFn: () =>
+        api.get<EntityRow[]>(`/api/v1/settings/${settingId}/entities/${table}`),
+      enabled: settingId != null,
+    })),
   });
 }
 

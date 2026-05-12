@@ -21,6 +21,10 @@ def db_path(tmp_path, monkeypatch) -> str:
     url = f"sqlite:///{db_file}"
     monkeypatch.setenv("STORYMASTER_DB_URL", url)
     monkeypatch.setenv("STORYMASTER_DB_PATH", str(db_file))
+    # The TestClient speaks plaintext http://testserver; `Secure` cookies
+    # would be silently dropped, breaking session round-trips. Production
+    # defaults to secure=True; tests opt out.
+    monkeypatch.setenv("STORYMASTER_SECURE_COOKIES", "false")
     _reset_app_modules()
     _run_migrations(url)
     return str(db_file)

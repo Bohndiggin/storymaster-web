@@ -1,0 +1,32 @@
+# Storymaster — deploy-only compose file.
+#
+# Differs from the repo's docker-compose.yml only in that there's no
+# `build:` block — this references a pre-built image you load with
+# `docker load < storymaster-web.tar.gz`. No source tree needed.
+
+services:
+  app:
+    image: storymaster-web:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      STORYMASTER_HOST: 0.0.0.0
+      STORYMASTER_PORT: "8765"
+    ports:
+      # Exposed on all interfaces so the TrueNAS-side nginx can reach the
+      # Rocky VM across the LAN. Cloudflare Tunnel still owns public TLS;
+      # restrict 8765 at the Rocky firewall to the TrueNAS box's IP only
+      # (see INTERNET.md for the firewall-cmd one-liner).
+      - "8765:8765"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8765/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    volumes:
+      # SELinux on Rocky enforces by default; the :Z suffix relabels the
+      # bind mount so the container user can write to it. Drop the suffix
+      # if you've disabled SELinux.
+      - ./backups:/var/backups/storymaster:Z

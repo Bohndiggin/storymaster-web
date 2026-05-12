@@ -17,6 +17,8 @@ import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { useWorkspace } from "@/lib/workspace";
 
+import { RelationshipSection } from "./RelationshipSection";
+import { relationshipsFor } from "./relationships";
 import { editableColumns, entityLabel, tableLabel, type EditableColumn } from "./schema";
 
 export function EntityFormPage() {
@@ -94,50 +96,75 @@ export function EntityFormPage() {
     navigate(`/lorekeeper/${table}`, { replace: true });
   };
 
+  const relationships = relationshipsFor(table);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {isNew
-            ? `New ${tableLabel(table)}`
-            : existing.data
-              ? entityLabel(table, existing.data)
-              : tableLabel(table)}
-        </CardTitle>
-        <Link
-          to={`/lorekeeper/${table}`}
-          className="text-xs text-slate-400 hover:text-slate-100"
-        >
-          ← Back
-        </Link>
-      </CardHeader>
-      <form onSubmit={submit} className="grid grid-cols-2 gap-4">
-        {columns.map((c) => (
-          <FieldFor
-            key={c.name}
-            column={c}
-            settingId={settingId}
-            value={form[c.name] ?? ""}
-            onChange={(v) => setForm((f) => ({ ...f, [c.name]: v }))}
-          />
-        ))}
-        <div className="col-span-2 flex items-center justify-between pt-2">
-          <div>
-            {!isNew ? (
-              <Button variant="danger" size="sm" onClick={onDelete} disabled={remove.isPending}>
-                Delete
+    <div className="flex flex-col gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {isNew
+              ? `New ${tableLabel(table)}`
+              : existing.data
+                ? entityLabel(table, existing.data)
+                : tableLabel(table)}
+          </CardTitle>
+          <Link
+            to={`/lorekeeper/${table}`}
+            className="text-xs text-slate-400 hover:text-slate-100"
+          >
+            ← Back
+          </Link>
+        </CardHeader>
+        <form onSubmit={submit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {columns.map((c) => (
+            <FieldFor
+              key={c.name}
+              column={c}
+              settingId={settingId}
+              value={form[c.name] ?? ""}
+              onChange={(v) => setForm((f) => ({ ...f, [c.name]: v }))}
+            />
+          ))}
+          <div className="flex items-center justify-between pt-2 md:col-span-2">
+            <div>
+              {!isNew ? (
+                <Button variant="danger" size="sm" onClick={onDelete} disabled={remove.isPending}>
+                  Delete
+                </Button>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-2">
+              {error ? <span className="text-xs text-red-400">{error}</span> : null}
+              <Button type="submit" disabled={create.isPending || update.isPending}>
+                {isNew ? "Create" : "Save"}
               </Button>
-            ) : null}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {error ? <span className="text-xs text-red-400">{error}</span> : null}
-            <Button type="submit" disabled={create.isPending || update.isPending}>
-              {isNew ? "Create" : "Save"}
-            </Button>
+        </form>
+      </Card>
+
+      {/* Relationship sections show only after the row exists — junctions need
+          a parent id to anchor on. */}
+      {!isNew && numericId != null && relationships.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Relationships</CardTitle>
+          </CardHeader>
+          <div className="flex flex-col gap-3">
+            {relationships.map((rel) => (
+              <RelationshipSection
+                key={rel.junctionTable}
+                relationship={rel}
+                parentId={numericId}
+                parentTable={table}
+                settingId={settingId}
+              />
+            ))}
           </div>
-        </div>
-      </form>
-    </Card>
+        </Card>
+      ) : null}
+    </div>
   );
 }
 
@@ -148,7 +175,7 @@ interface FieldForProps {
   onChange: (v: string) => void;
 }
 
-function FieldFor({ column, settingId, value, onChange }: FieldForProps) {
+export function FieldFor({ column, settingId, value, onChange }: FieldForProps) {
   const isLong = column.inputType === "textarea";
   return (
     <Field
@@ -243,13 +270,13 @@ function prettyName(s: string): string {
   return s.replace(/_/g, " ");
 }
 
-function valueToString(v: unknown): string {
+export function valueToString(v: unknown): string {
   if (v == null) return "";
   if (typeof v === "boolean") return v ? "true" : "false";
   return String(v);
 }
 
-function coerceForm(
+export function coerceForm(
   form: Record<string, string>,
   columns: EditableColumn[],
 ): Record<string, unknown> {
@@ -274,7 +301,7 @@ function coerceForm(
   return out;
 }
 
-function formatApiError(err: ApiError): string {
+export function formatApiError(err: ApiError): string {
   const detail = err.detail;
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {

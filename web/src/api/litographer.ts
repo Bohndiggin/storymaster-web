@@ -25,6 +25,34 @@ export function useConnections(storylineId: number | null) {
   });
 }
 
+export function useNodesInSection(sectionId: number | null) {
+  return useQuery({
+    queryKey:
+      sectionId != null
+        ? (["section-nodes", sectionId] as const)
+        : (["section-nodes", "idle"] as const),
+    queryFn: () =>
+      api.get<LitographyNode[]>(`/api/v1/plot-sections/${sectionId}/nodes`),
+    enabled: sectionId != null,
+  });
+}
+
+/** Idempotently link a node into a plot section. */
+export function useAddNodeToSection(storylineId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sectionId, nodeId }: { sectionId: number; nodeId: number }) =>
+      api.post(`/api/v1/plot-sections/${sectionId}/nodes`, {
+        node_id: nodeId,
+        plot_section_id: sectionId,
+      }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["section-nodes", vars.sectionId] });
+      qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) });
+    },
+  });
+}
+
 export interface NodeCreatePayload {
   name?: string;
   description?: string | null;
@@ -41,8 +69,10 @@ export function useCreateNode(storylineId: number) {
         `/api/v1/storylines/${storylineId}/nodes`,
         payload,
       ),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) });
+      qc.invalidateQueries({ queryKey: ["section-nodes"] });
+    },
   });
 }
 
@@ -51,8 +81,10 @@ export function useUpdateNode(storylineId: number) {
   return useMutation({
     mutationFn: ({ id, ...payload }: { id: number } & Partial<NodeCreatePayload>) =>
       api.patch<LitographyNode>(`/api/v1/nodes/${id}`, payload),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) });
+      qc.invalidateQueries({ queryKey: ["section-nodes"] });
+    },
   });
 }
 
@@ -65,6 +97,7 @@ export function useDeleteNode(storylineId: number) {
       // both caches so the UI refreshes consistently.
       qc.invalidateQueries({ queryKey: NODES_KEY(storylineId) });
       qc.invalidateQueries({ queryKey: CONNS_KEY(storylineId) });
+      qc.invalidateQueries({ queryKey: ["section-nodes"] });
     },
   });
 }
@@ -81,12 +114,17 @@ export interface NodePosition {
  * during a multi-node drag.
  */
 export function useBulkPositionUpdate(storylineId: number) {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (positions: NodePosition[]) =>
       api.patch<void>(
         `/api/v1/storylines/${storylineId}/nodes/positions`,
         { positions },
       ),
+    onSuccess: () => {
+      // Section-scoped node lists embed positions, so they need refresh too.
+      qc.invalidateQueries({ queryKey: ["section-nodes"] });
+    },
   });
 }
 
